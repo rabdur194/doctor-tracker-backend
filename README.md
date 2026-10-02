@@ -222,7 +222,7 @@ If the app grew to have complex global state, Redux Toolkit or Zustand would be 
    JWT_SECRET=a_long_random_secret
    JWT_EXPIRE=7d
    NODE_ENV=production
-   FRONTEND_URL=https://your-frontend.vercel.app
+   FRONTEND_URL=https://doctor-tracker-frontend-opal.vercel.app/login
    PORT=10000
    ```
 5. For MongoDB: create a free cluster on [MongoDB Atlas](https://www.mongodb.com/atlas) and paste the connection string into `MONGODB_URI`.
@@ -230,7 +230,7 @@ If the app grew to have complex global state, Redux Toolkit or Zustand would be 
    ```
    node src/seed.js
    ```
-7. Your backend URL will look like: `https://doctor-tracker-api.onrender.com`
+7. Backend URL : `https://doctor-tracker-backend-06yb.onrender.com/`
 
 ### 2. Frontend → Vercel (Recommended for Next.js)
 
@@ -238,16 +238,16 @@ If the app grew to have complex global state, Redux Toolkit or Zustand would be 
 2. Go to [Vercel](https://vercel.com) → New Project → Import the frontend repo.
 3. Environment Variable:
    ```
-   NEXT_PUBLIC_API_URL=https://your-backend.onrender.com/api
+   NEXT_PUBLIC_API_URL=https://doctor-tracker-backend-06yb.onrender.com/
    ```
-4. Deploy. Your frontend URL will look like: `https://doctor-tracker.vercel.app`
+4. Deploy. frontend URL : `https://doctor-tracker-frontend-opal.vercel.app/login`
 
 ### Important CORS note
 
 Make sure the backend `.env` / Render env has:
 
 ```
-FRONTEND_URL=https://your-actual-frontend-url.vercel.app
+FRONTEND_URL=https://doctor-tracker-frontend-opal.vercel.app/login
 ```
 
 so CORS allows the live frontend.
@@ -276,4 +276,4 @@ so CORS allows the live frontend.
 
 ## Visual Evidence
 
-Screenshots are attached in the root folder with FrontEnd and Backend
+Screenshots are attached in the root folder ([UI_Screenshots](./UI_Screenshots)) with FrontEnd and Backend
