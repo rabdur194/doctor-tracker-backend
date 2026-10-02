@@ -8,23 +8,25 @@ Doctor Tracker is a full-stack admin portal built for healthcare administrators.
 
 ## Tech Stack
 
-| Layer     | Technology                          |
-|-----------|-------------------------------------|
+| Layer     | Technology                                                                |
+| --------- | ------------------------------------------------------------------------- |
 | Frontend  | Next.js 14 (App Router), TypeScript, Tailwind CSS, Recharts, Lucide Icons |
-| Backend   | Node.js, Express.js                 |
-| Database  | MongoDB (Mongoose ODM)             |
-| Auth      | JWT (JSON Web Tokens) + bcrypt      |
-| API       | RESTful design principles           |
-| Local Dev | Docker + Docker Compose (optional but recommended) |
+| Backend   | Node.js, Express.js                                                       |
+| Database  | MongoDB (Mongoose ODM)                                                    |
+| Auth      | JWT (JSON Web Tokens) + bcrypt                                            |
+| API       | RESTful design principles                                                 |
+| Local Dev | Docker + Docker Compose (optional but recommended)                        |
 
 ## Features
 
 ### Authentication
+
 - Secure login with JWT
 - All routes protected (frontend + backend)
 - Password hashing with bcrypt
 
 ### Doctor Management
+
 - Create doctors (name, specialization, hospital, phone, email)
 - List with search, specialization filter, date-wise filter
 - Pagination
@@ -32,12 +34,14 @@ Doctor Tracker is a full-stack admin portal built for healthcare administrators.
 - Add / remove patients under a doctor
 
 ### Patient Management
+
 - Dedicated Patients page
 - List, edit, delete patients
 - Search, condition filter, date-wise filter
 - Pagination
 
 ### Dashboard & Data Visualization
+
 - Total doctors & total patients
 - Patients per doctor (bar chart)
 - Top conditions (pie chart)
@@ -76,9 +80,7 @@ doctor-tracker/
 
 ---
 
-## Local Setup (Recommended for Interview)
-
-You have **two options**. Docker is recommended because it guarantees MongoDB works the same on any machine.
+## Local Setup
 
 ### Option A — Docker (Recommended)
 
@@ -92,8 +94,8 @@ docker compose up --build -d
 docker compose exec backend node src/seed.js
 ```
 
-- Backend API → http://localhost:5000  
-- MongoDB → localhost:27017  
+- Backend API → http://localhost:5000
+- MongoDB → localhost:27017
 
 Then start the frontend **locally** (faster for development):
 
@@ -105,10 +107,12 @@ npm run dev          # → http://localhost:3000
 ```
 
 **Login credentials (after seeding):**
+
 - Email: `admin@doctortracker.com`
 - Password: `admin123`
 
 To stop everything:
+
 ```bash
 docker compose down
 ```
@@ -118,6 +122,7 @@ docker compose down
 **Prerequisites:** Node.js 18+, MongoDB running locally.
 
 #### 1. Backend
+
 ```bash
 cd backend
 cp .env.example .env
@@ -129,6 +134,7 @@ npm run dev          # → http://localhost:5000
 ```
 
 #### 2. Frontend
+
 ```bash
 cd frontend
 cp .env.example .env.local
@@ -160,6 +166,7 @@ npm run dev          # → http://localhost:3000
 ```
 
 **Data flow:**
+
 1. User logs in → Backend validates credentials → returns JWT
 2. Frontend stores JWT in localStorage
 3. Every subsequent request includes `Authorization: Bearer <token>`
@@ -174,6 +181,7 @@ npm run dev          # → http://localhost:3000
 ### 1. Why separate Express backend instead of Next.js API routes?
 
 The specification explicitly required a **separate standalone Express server** communicating over REST endpoints. This separation:
+
 - Makes the API reusable by other clients (mobile apps, etc.)
 - Keeps concerns clearly divided
 - Allows independent scaling of frontend and backend
@@ -182,6 +190,7 @@ The specification explicitly required a **separate standalone Express server** c
 ### 2. Why React Context for auth instead of Redux?
 
 For this application the auth state is simple (user object + token). React Context + a custom hook (`useAuth`) provides:
+
 - Zero extra dependency weight
 - Easy to understand for junior developers
 - Sufficient performance (auth changes are rare)
@@ -190,6 +199,7 @@ For this application the auth state is simple (user object + token). React Conte
 If the app grew to have complex global state, Redux Toolkit or Zustand would be considered.
 
 ### Additional optimizations implemented:
+
 - MongoDB indexes on searchable/filterable fields (`name`, `specialization`, `condition`, `createdAt`, compound indexes)
 - `Promise.all` for parallel queries
 - `.lean()` for faster read queries
@@ -197,10 +207,6 @@ If the app grew to have complex global state, Redux Toolkit or Zustand would be 
 - Avoided unnecessary re-renders with proper `useCallback` dependencies
 
 ---
-
-## Deployment Guide (Required for Submission)
-
-You need **two separate GitHub repositories** and live URLs.
 
 ### 1. Backend → Render (Free Tier) — Recommended
 
@@ -237,53 +243,37 @@ You need **two separate GitHub repositories** and live URLs.
 4. Deploy. Your frontend URL will look like: `https://doctor-tracker.vercel.app`
 
 ### Important CORS note
+
 Make sure the backend `.env` / Render env has:
+
 ```
 FRONTEND_URL=https://your-actual-frontend-url.vercel.app
 ```
+
 so CORS allows the live frontend.
 
 ---
-
-## Submission Checklist
-
-- [ ] Frontend GitHub repository link
-- [ ] Backend GitHub repository link
-- [ ] Live frontend website URL (Vercel / Netlify)
-- [ ] Live backend API URL (Render)
-- [ ] Local environment works (test with `docker compose up` or manual setup before the interview)
 
 ---
 
 ## API Endpoints Summary
 
-| Method | Endpoint                              | Description                    |
-|--------|---------------------------------------|--------------------------------|
-| POST   | /api/auth/login                       | Login                          |
-| GET    | /api/auth/me                          | Current user                   |
-| GET    | /api/doctors                          | List doctors (search/filter/page) |
-| POST   | /api/doctors                          | Create doctor                  |
-| GET    | /api/doctors/:id                      | Get doctor                     |
-| GET    | /api/doctors/:id/patients             | Patients of a doctor           |
-| POST   | /api/doctors/:id/patients             | Add patient under doctor       |
-| DELETE | /api/doctors/:doctorId/patients/:id   | Remove patient from doctor     |
-| GET    | /api/patients                         | List all patients              |
-| PUT    | /api/patients/:id                     | Update patient                 |
-| DELETE | /api/patients/:id                     | Delete patient                 |
-| GET    | /api/dashboard                        | Analytics stats                |
-| GET    | /api/health                           | Health check                   |
+| Method | Endpoint                            | Description                       |
+| ------ | ----------------------------------- | --------------------------------- |
+| POST   | /api/auth/login                     | Login                             |
+| GET    | /api/auth/me                        | Current user                      |
+| GET    | /api/doctors                        | List doctors (search/filter/page) |
+| POST   | /api/doctors                        | Create doctor                     |
+| GET    | /api/doctors/:id                    | Get doctor                        |
+| GET    | /api/doctors/:id/patients           | Patients of a doctor              |
+| POST   | /api/doctors/:id/patients           | Add patient under doctor          |
+| DELETE | /api/doctors/:doctorId/patients/:id | Remove patient from doctor        |
+| GET    | /api/patients                       | List all patients                 |
+| PUT    | /api/patients/:id                   | Update patient                    |
+| DELETE | /api/patients/:id                   | Delete patient                    |
+| GET    | /api/dashboard                      | Analytics stats                   |
+| GET    | /api/health                         | Health check                      |
 
 ## Visual Evidence
 
-> After running the app, take screenshots of:
-> - Login page (desktop + mobile)
-> - Dashboard with charts
-> - Doctors list with filters
-> - Doctor detail (patients list)
-> - Patients page with edit modal
->
-> Place them in a `/screenshots` folder and reference them here.
-
-## License
-
-This project was created as a technical assessment submission.
+Screenshots are attached in the root folder with FrontEnd and Backend
