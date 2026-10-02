@@ -1,18 +1,33 @@
-const express = require("express");
-const router = express.Router();
+const express = require('express');
 const {
-  getDoctors,
-  getDoctor,
   createDoctor,
-  updateDoctor,
-  deleteDoctor,
+  getDoctors,
+  getDoctorById,
   getDoctorPatients,
-} = require("../controllers/doctorController");
-const { protect } = require("../middleware/auth");
+  addPatientToDoctor,
+  deletePatientFromDoctor,
+  deleteDoctor,
+} = require('../controllers/doctorController');
+const { protect } = require('../middleware/auth');
 
-//All doctord require login
+const router = express.Router();
+
+// All doctor routes are protected
 router.use(protect);
-router.route("/").get(getDoctors).post(createDoctor);
-router.route("/:id").get(getDoctor).put(updateDoctor).delete(deleteDoctor);
-router.get("/:id/patients", getDoctorPatients);
+
+router.route('/')
+  .get(getDoctors)
+  .post(createDoctor);
+
+router.route('/:id')
+  .get(getDoctorById)
+  .delete(deleteDoctor);
+
+router.route('/:id/patients')
+  .get(getDoctorPatients)
+  .post(addPatientToDoctor);
+
+router.route('/:doctorId/patients/:patientId')
+  .delete(deletePatientFromDoctor);
+
 module.exports = router;

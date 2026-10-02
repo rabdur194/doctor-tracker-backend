@@ -1,35 +1,50 @@
-const mongoose = require("mongoose");
-const docotrSchema = new mongoose.Schema(
+const mongoose = require('mongoose');
+
+/**
+ * Doctor Schema
+ * Fields: name, specialization, hospital, phone, email
+ * Indexing for search, filter, pagination performance
+ */
+const doctorSchema = new mongoose.Schema(
   {
     name: {
       type: String,
-      required: [true, "Doctor Name Required"],
+      required: [true, 'Doctor name is required'],
       trim: true,
+      index: true, // Index for fast search
     },
     specialization: {
       type: String,
-      required: [true, "Specialization Required"],
+      required: [true, 'Specialization is required'],
       trim: true,
-      index: true, //faster filtering by specialization
+      index: true, // Index for filtering by specialization
     },
     hospital: {
       type: String,
-      required: [true, "Hopsital name is Required"],
+      required: [true, 'Hospital is required'],
       trim: true,
+      index: true,
     },
     phone: {
       type: String,
+      required: [true, 'Phone number is required'],
       trim: true,
     },
     email: {
       type: String,
-      trim: true,
+      required: [true, 'Email is required'],
       lowercase: true,
+      trim: true,
+      unique: true,
     },
   },
-  { timestamps: true }, // needed for date-wise filter, adds createdAt, updatedAt automatically
+  {
+    timestamps: true, // createdAt used for date-wise filtering
+  }
 );
 
-//Search for name/Hospital
-docotrSchema.index({ name: "text", hospital: "text" });
-module.exports = mongoose.model("Doctor", docotrSchema);
+// Compound index for common query patterns (search + date filter)
+doctorSchema.index({ name: 'text', specialization: 'text', hospital: 'text' });
+doctorSchema.index({ createdAt: -1 }); // For date-wise sorting/filtering
+
+module.exports = mongoose.model('Doctor', doctorSchema);

@@ -1,3 +1,7 @@
+/**
+ * Seed script - creates an admin user and sample doctors + patients
+ * Run with: npm run seed
+ */
 require("dotenv").config();
 const mongoose = require("mongoose");
 const User = require("./models/User");
@@ -8,94 +12,67 @@ const connectDB = async () => {
   await mongoose.connect(process.env.MONGODB_URI);
   console.log("MongoDB connected for seeding");
 };
+
 const seedData = async () => {
   try {
     await connectDB();
-    //clear existing data
-    await User.deleteMnay();
+
+    // Clear existing data
+    await User.deleteMany();
     await Doctor.deleteMany();
     await Patient.deleteMany();
-    console.log("cleared old data");
+    console.log("Cleared existing data");
 
-    //create Admin
+    // Create admin user
+    // Default credentials: admin@doctortracker.com / admin123
     const admin = await User.create({
       name: "Admin User",
       email: "admin@doctortracker.com",
       password: "admin123",
     });
-    console.log("Admin created", admin.email);
+    console.log("Admin created:", admin.email);
+
+    // Sample doctors
     const doctors = await Doctor.insertMany([
       {
-        name: "Dr. Rafiqul Islam",
+        name: "Dr. Sarah Johnson",
         specialization: "Cardiology",
-        hospital: "Square Hospital, Dhaka",
-        phone: "+880-1711-100101",
-        email: "rafiqul.islam@hospital.com",
+        hospital: "City Heart Hospital",
+        phone: "+1-555-0101",
+        email: "sarah.johnson@hospital.com",
       },
       {
-        name: "Dr. Nasrin Akter",
+        name: "Dr. Michael Chen",
         specialization: "Neurology",
-        hospital: "Evercare Hospital, Dhaka",
-        phone: "+880-1711-100102",
-        email: "nasrin.akter@hospital.com",
+        hospital: "Metro Neuro Center",
+        phone: "+1-555-0102",
+        email: "michael.chen@hospital.com",
       },
       {
-        name: "Dr. Kamal Hossain",
+        name: "Dr. Emily Rodriguez",
         specialization: "Pediatrics",
-        hospital: "Dhaka Shishu Hospital",
-        phone: "+880-1711-100103",
-        email: "kamal.hossain@hospital.com",
+        hospital: "Children Care Clinic",
+        phone: "+1-555-0103",
+        email: "emily.rodriguez@hospital.com",
       },
       {
-        name: "Dr. Farhana Rahman",
+        name: "Dr. James Wilson",
         specialization: "Orthopedics",
-        hospital: "Popular Diagnostic Center",
-        phone: "+880-1711-100104",
-        email: "farhana.rahman@hospital.com",
+        hospital: "Bone & Joint Institute",
+        phone: "+1-555-0104",
+        email: "james.wilson@hospital.com",
       },
       {
-        name: "Dr. Imran Chowdhury",
+        name: "Dr. Aisha Patel",
         specialization: "Dermatology",
-        hospital: "Labaid Specialized Hospital",
-        phone: "+880-1711-100105",
-        email: "imran.chowdhury@hospital.com",
-      },
-      {
-        name: "Dr. Sabina Yasmin",
-        specialization: "Gynecology",
-        hospital: "Birdem General Hospital",
-        phone: "+880-1711-100106",
-        email: "sabina.yasmin@hospital.com",
+        hospital: "Skin Health Center",
+        phone: "+1-555-0105",
+        email: "aisha.patel@hospital.com",
       },
     ]);
-    console.log(`creted ${doctors.length} dcotors`);
-    const patientNames = [
-      "Abdul Karim",
-      "Fatema Begum",
-      "Mohammad Ali",
-      "Rokeya Khatun",
-      "Jahid Hasan",
-      "Nusrat Jahan",
-      "Shahidul Islam",
-      "Mitu Akter",
-      "Rashed Khan",
-      "Salma Sultana",
-      "Tanvir Ahmed",
-      "Jannatul Ferdous",
-      "Mahmudul Hasan",
-      "Sharmin Akter",
-      "Rakibul Islam",
-      "Nazmul Huda",
-      "Ayesha Siddika",
-      "Sajjad Hossain",
-      "Mariam Begum",
-      "Faruk Ahmed",
-      "Laila Parvin",
-      "Asif Mahmud",
-      "Sumaiya Rahman",
-      "Habibullah Khan",
-      "Nargis Akter",
-    ];
+    console.log(`Created ${doctors.length} doctors`);
+
+    // Sample patients
     const conditions = [
       "Hypertension",
       "Diabetes Type 2",
@@ -108,30 +85,33 @@ const seedData = async () => {
       "Allergy",
       "Anxiety",
     ];
+
     const patients = [];
     for (let i = 0; i < 25; i++) {
       const doctor = doctors[i % doctors.length];
       patients.push({
-        name: patientNames[i],
-        age: 18 + Math.floor(Math.random() * 55),
-        gender: i % 2 === 0 ? "male" : "female",
+        name: `Patient ${i + 1}`,
+        age: 20 + Math.floor(Math.random() * 50),
         condition: conditions[i % conditions.length],
-        phone: `+880-17${String(10000000 + i).slice(-8)}`,
+        phone: `+1-555-${String(1000 + i).padStart(4, "0")}`,
+        email: `patient${i + 1}@email.com`,
         doctor: doctor._id,
       });
     }
+
     await Patient.insertMany(patients);
     console.log(`Created ${patients.length} patients`);
 
-    console.log("\nSeed completed successfully!");
+    console.log("\n✅ Seed completed successfully!");
     console.log("Login credentials:");
     console.log("  Email: admin@doctortracker.com");
     console.log("  Password: admin123");
 
     process.exit(0);
   } catch (error) {
-    console.error("Seed error", error);
+    console.error("Seed error:", error);
     process.exit(1);
   }
 };
+
 seedData();

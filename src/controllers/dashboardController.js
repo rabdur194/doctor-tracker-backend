@@ -1,103 +1,117 @@
-const Doctor = require("../models/Doctor");
-const Patient = require("../models/Patient");
-const getDashboard = async (req, res) => {
+const Doctor = require('../models/Doctor');
+const Patient = require('../models/Patient');
+
+/**
+ * @desc    Get dashboard analytics
+ * @route   GET /api/dashboard
+ * @access  Private
+ * Returns:
+ *  - totalDoctors
+ *  - totalPatients
+ *  - patientsPerDoctor (array)
+ *  - dateBasedStats (patients/doctors created per day for last 30 days)
+ */
+const getDashboardStats = async (req, res, next) => {
   try {
-    //totals
-    const totalDoctors = await Doctor.countDocuments();
-    const totalPatients = await Patient.countDocuments();
-    //Patients per Doctor- Bar chart
+    // Total counts - simple and fast
+    const [totalDoctors, totalPatients] = await Promise.all([
+      Doctor.countDocuments(),
+      Patient.countDocuments(),
+    ]);
+
+    // Patients per doctor (aggregation for performance)
     const patientsPerDoctor = await Patient.aggregate([
       {
         $group: {
-          _id: "doctor", //group by doctor field
-          count: { $sum: 1 }, //count patients
+          _id: '$doctor',
+          patientCount: { $sum: 1 },
         },
       },
-
-      //joining doctor collection names
       {
         $lookup: {
-          from: "doctors",
-          localField: "_id",
-          foreignField: "_id",
-          as: "doctorInfo", //result array
+          from: 'doctors', // collection name (lowercase plural)
+          localField: '_id',
+          foreignField: '_id',
+          as: 'doctorInfo',
         },
       },
-      //doctorInfo is an array, unwind to a single object
-      { $unwind: { path: "$doctorInfo", preserveNullAndEmptyArrays: true } },
-      //shape the output for forntend chart
+      {
+        $unwind: {
+          path: '$doctorInfo',
+          preserveNullAndEmptyArrays: true,
+        },
+      },
       {
         $project: {
+          doctorId: '$_id',
+          doctorName: '$doctorInfo.name',
+          specialization: '$doctorInfo.specialization',
+          patientCount: 1,
           _id: 0,
-          doctorId: "$_id",
-          doctorName: { $ifNull: ["$doctorInfo.name", "Unknown"] },
-          count: 1,
-        },
-      },
-      { $sort: { count: -1 } },
-    ]);
-
-    // Top conditions for PIE Chart
-    const topConditions = await Patient.aggregate([
-      {
-        $match: {
-          condition: { $exists: true, $nin: [null, ""] },
         },
       },
       {
-        $group: {
-          _id: "$condition", //group by condition text
-          count: { $sum: 1 },
-        },
-      },
-      { $sort: { count: -1 } },
-      { $limit: 8 },
-      {
-        $project: {
-          _id: 0,
-          condition: "$_id",
-          count: 1,
-        },
+        $sort: { patientCount: -1 },
       },
     ]);
 
-    //History for Line-cahrt
+    // Date-based stats: last 30 days of new patients & doctors
     const thirtyDaysAgo = new Date();
     thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
-    const activityRaw = await Patient.aggregate([
+
+    const patientsByDate = await Patient.aggregate([
       {
-        $match: {
-          createdAt: { $gte: thirtyDaysAgo },
-        },
+        $match: { createdAt: { $gte: thirtyDaysAgo } },
       },
       {
         $group: {
           _id: {
-            $dateToString: { format: "%Y-%m-%d", date: "$createdAt" },
+            $dateToString: { format: '%Y-%m-%d', date: '$createdAt' },
           },
           count: { $sum: 1 },
         },
       },
       { $sort: { _id: 1 } },
+    ]);
+
+    const doctorsByDate = await Doctor.aggregate([
       {
-        $project: {
-          _id: 0,
-          date: "$_id",
-          count: 1,
+        $match: { createdAt: { $gte: thirtyDaysAgo } },
+      },
+      {
+        $group: {
+          _id: {
+            $dateToString: { format: '%Y-%m-%d', date: '$createdAt' },
+          },
+          count: { $sum: 1 },
         },
       },
+      { $sort: { _id: 1 } },
     ]);
-    res.json({
-      totals: {
-        doctors: totalDoctors,
-        patients: totalPatients,
+
+    // Condition distribution (for pie chart)
+    const conditionStats = await Patient.aggregate([
+      {
+        $group: {
+          _id: '$condition',
+          count: { $sum: 1 },
+        },
       },
-      patientsPerDoctor, //bar chart
-      topConditions,
-      activity: activityRaw,
+      { $sort: { count: -1 } },
+      { $limit: 10 }, // Top 10 conditions
+    ]);
+
+    res.json({
+      totalDoctors,
+      totalPatients,
+      patientsPerDoctor,
+      patientsByDate,
+      doctorsByDate,
+      conditionStats,
     });
   } catch (error) {
-    res.status(500).json({ message: error.message });
+    next(error);
   }
 };
-module.exports = { getDashboard };
+
+module.exports = { getDashboardStats };
